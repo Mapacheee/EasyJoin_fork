@@ -1,0 +1,6 @@
+api-version: '1.21'
+name: EasyJoin
+version: ${project.version}
+main: me.espryth.easyjoin.EasyJoinPlugin
+authors: [Espryth, Mapacheee]
+package-state: internal

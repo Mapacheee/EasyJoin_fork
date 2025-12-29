@@ -1,0 +1,6 @@
+name: EasyJoin
+version: ${project.version}
+main: me.espryth.easyjoin.EasyJoinPlugin
+api-version: '1.21'
+authors: [Espryth, Mapacheee]
+softdepend: [PlaceholderAPI, AuthMe, nLogin]
