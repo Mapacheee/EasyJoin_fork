@@ -6,15 +6,12 @@ import me.espryth.easyjoin.util.AvatarUtils;
 import me.espryth.easyjoin.util.MessageUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.FireworkMeta;
 
 import java.util.*;
@@ -48,9 +45,9 @@ public class ActionService {
         registerAction("[MESSAGE]", data -> (player, queue) -> {
             Component msg = MessageUtils.colorizeToComponent(me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, data));
             if (data.startsWith("<c>")) {
-                // Centering with Components is harder, let's keep it legacy for centering or try to adapt
                 String legacy = MessageUtils.formatString(player, data);
-                player.sendMessage(MessageUtils.getCenteredMessage(legacy.replace("<c>", "")));
+                Component centeredMsg = MessageUtils.colorizeToComponent(MessageUtils.getCenteredMessage(legacy.replace("<c>", "")));
+                player.sendMessage(centeredMsg);
             } else {
                 player.sendMessage(msg);
             }
@@ -60,7 +57,8 @@ public class ActionService {
             Component msg = MessageUtils.colorizeToComponent(me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, data));
             if (data.startsWith("<c>")) {
                 String legacy = MessageUtils.formatString(player, data);
-                Bukkit.broadcastMessage(MessageUtils.getCenteredMessage(legacy.replace("<c>", "")));
+                Component centeredMsg = MessageUtils.colorizeToComponent(MessageUtils.getCenteredMessage(legacy.replace("<c>", "")));
+                Bukkit.broadcast(centeredMsg);
             } else {
                 Bukkit.broadcast(msg);
             }
@@ -148,7 +146,7 @@ public class ActionService {
 
         registerAction("[CLEARCHAT]", data -> (player, queue) -> {
             int lines = Integer.parseInt(data);
-            for (int i = 0; i < lines; i++) player.sendMessage(" ");
+            for (int i = 0; i < lines; i++) player.sendMessage(Component.text(" "));
         });
 
         registerAction("[FIREWORK]", data -> (player, queue) -> {

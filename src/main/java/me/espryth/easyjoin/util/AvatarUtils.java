@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,7 @@ public class AvatarUtils {
 
     public static List<Component> getAvatar(String playerName) {
         try {
-            URL url = new URL("https://mc-heads.net/avatar/" + playerName + "/8");
+            URL url = URI.create("https://mc-heads.net/avatar/" + playerName + "/8").toURL();
             BufferedImage image = ImageIO.read(url);
             List<Component> lines = new ArrayList<>();
 

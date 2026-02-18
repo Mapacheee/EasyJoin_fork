@@ -30,7 +30,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        event.setJoinMessage(null);
+        event.joinMessage(null);
 
         firstJoinService.isFirstJoin(player).thenAccept(isFirst -> {
             Optional<Format> formatOpt = formatService.getFormatForPlayer(player, isFirst);
@@ -47,7 +47,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        event.setQuitMessage(null);
+        event.quitMessage(null);
 
         Optional<Format> formatOpt = formatService.getFormatForPlayer(player, false);
         if (formatOpt.isEmpty()) formatOpt = formatService.getDefaultFormat(false);
