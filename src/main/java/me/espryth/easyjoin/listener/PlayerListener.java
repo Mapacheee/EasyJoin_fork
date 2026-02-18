@@ -1,6 +1,7 @@
 package me.espryth.easyjoin.listener;
 
-import com.thewinterframework.service.annotation.Service;
+import com.thewinterframework.paper.listener.ListenerComponent;
+import jakarta.inject.Inject;
 import me.espryth.easyjoin.action.ActionQueue;
 import me.espryth.easyjoin.format.Format;
 import me.espryth.easyjoin.service.FirstJoinService;
@@ -14,13 +15,14 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.Optional;
 
-@Service
+@ListenerComponent
 public class PlayerListener implements Listener {
 
     private final Plugin plugin;
     private final FormatService formatService;
     private final FirstJoinService firstJoinService;
 
+    @Inject
     public PlayerListener(Plugin plugin, FormatService formatService, FirstJoinService firstJoinService) {
         this.plugin = plugin;
         this.formatService = formatService;

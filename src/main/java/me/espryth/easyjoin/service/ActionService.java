@@ -5,6 +5,8 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import me.espryth.easyjoin.action.Action;
 import me.espryth.easyjoin.util.AvatarUtils;
 import me.espryth.easyjoin.util.MessageUtils;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.title.Title;
@@ -14,6 +16,7 @@ import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.FireworkMeta;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -43,14 +46,12 @@ public class ActionService {
     }
 
     private void registerDefaultActions() {
-        // Mensajes
         registerAction("[MESSAGE]", data -> (player, queue) ->
-            sendMessage(player, data, player::sendMessage));
+                sendMessage(player, data, player::sendMessage));
 
         registerAction("[BROADCAST]", data -> (player, queue) ->
-            sendMessage(player, data, Bukkit::broadcast));
+                sendMessage(player, data, Bukkit::broadcast));
 
-        // Mensajes JSON
         registerAction("[JSON_MESSAGE]", data -> (player, queue) -> {
             String json = MessageUtils.formatString(player, data);
             player.sendMessage(GsonComponentSerializer.gson().deserialize(json));
@@ -61,7 +62,6 @@ public class ActionService {
             Bukkit.broadcast(GsonComponentSerializer.gson().deserialize(json));
         });
 
-        // Action bar
         registerAction("[ACTIONBAR]", data -> (player, queue) -> {
             Component msg = MessageUtils.colorizeToComponent(PlaceholderAPI.setPlaceholders(player, data));
             player.sendActionBar(msg);
@@ -73,16 +73,16 @@ public class ActionService {
         });
 
         registerAction("[TITLE]", data -> (player, queue) ->
-            showTitle(player, data, player::showTitle));
+                showTitle(player, data, player::showTitle));
 
         registerAction("[BROADCAST_TITLE]", data -> (player, queue) ->
-            showTitle(player, data, title -> Bukkit.getOnlinePlayers().forEach(p -> p.showTitle(title))));
+                showTitle(player, data, title -> Bukkit.getOnlinePlayers().forEach(p -> p.showTitle(title))));
 
         registerAction("[AVATAR_MESSAGE]", data -> (player, queue) ->
-            sendAvatarMessage(player, data, player::sendMessage));
+                sendAvatarMessage(player, data, player::sendMessage));
 
         registerAction("[AVATAR_BROADCAST]", data -> (player, queue) ->
-            sendAvatarMessage(player, data, Bukkit::broadcast));
+                sendAvatarMessage(player, data, Bukkit::broadcast));
 
         registerAction("[CLEARCHAT]", data -> (player, queue) -> {
             int lines = Integer.parseInt(data);
@@ -90,7 +90,7 @@ public class ActionService {
         });
 
         registerAction("[FIREWORK]", data -> (player, queue) ->
-            spawnFirework(player, data));
+                spawnFirework(player, data));
 
         registerAction("[CONSOLE]", data -> (player, queue) -> {
             String cmd = MessageUtils.formatString(player, data);
@@ -103,11 +103,10 @@ public class ActionService {
         });
 
         registerAction("[SOUND]", data -> (player, queue) ->
-            playSound(player, data, player::playSound));
+                playSoundCommand(player, data));
 
         registerAction("[BROADCAST_SOUND]", data -> (player, queue) ->
-            playSound(player, data, (loc, sound, vol, pitch) ->
-                Bukkit.getOnlinePlayers().forEach(p -> p.playSound(loc, sound, vol, pitch))));
+                playBroadcastSoundCommand(data));
 
         registerAction("[DELAY]", data -> (player, queue) -> {
             try {
@@ -144,13 +143,13 @@ public class ActionService {
         Component subtitle = MessageUtils.colorizeToComponent(PlaceholderAPI.setPlaceholders(player, subtitleStr));
 
         var titleObj = Title.title(
-            title,
-            subtitle,
-            Title.Times.times(
-                java.time.Duration.ofMillis(fadeIn * 50L),
-                java.time.Duration.ofMillis(stay * 50L),
-                java.time.Duration.ofMillis(fadeOut * 50L)
-            )
+                title,
+                subtitle,
+                Title.Times.times(
+                        Duration.ofMillis(fadeIn * 50L),
+                        Duration.ofMillis(stay * 50L),
+                        Duration.ofMillis(fadeOut * 50L)
+                )
         );
         titleSender.accept(titleObj);
     }
@@ -169,42 +168,70 @@ public class ActionService {
     private void spawnFirework(Player player, String data) {
         String[] parts = data.split(";");
         if (parts.length < 3) return;
-        try {
-            FireworkEffect.Type type = FireworkEffect.Type.valueOf(parts[0].toUpperCase());
-            int amount = Integer.parseInt(parts[1]);
-            int power = Integer.parseInt(parts[2]);
-            List<Color> colors = new ArrayList<>();
-            List<Color> fades = new ArrayList<>();
-            for (int i = 3; i < parts.length; i++) {
-                String[] rgb = parts[i].split(",");
-                Color color = Color.fromRGB(Integer.parseInt(rgb[0]), Integer.parseInt(rgb[1]), Integer.parseInt(rgb[2]));
-                if (i % 2 == 0) fades.add(color); else colors.add(color);
-            }
-            Firework firework = (Firework) player.getLocation().getWorld().spawnEntity(player.getLocation(), EntityType.FIREWORK_ROCKET);
-            FireworkMeta meta = firework.getFireworkMeta();
-            meta.setPower(power);
-            meta.addEffect(FireworkEffect.builder().with(type).withColor(colors).withFade(fades).trail(true).build());
-            firework.setFireworkMeta(meta);
-            for (int i = 1; i < amount; i++) {
-                Firework f = (Firework) player.getLocation().getWorld().spawnEntity(player.getLocation(), EntityType.FIREWORK_ROCKET);
-                f.setFireworkMeta(meta);
-            }
-        } catch (Exception ignored) {}
+        FireworkEffect.Type type = FireworkEffect.Type.valueOf(parts[0].toUpperCase());
+        int amount = Integer.parseInt(parts[1]);
+        int power = Integer.parseInt(parts[2]);
+        List<Color> colors = new ArrayList<>();
+        List<Color> fades = new ArrayList<>();
+
+        for (int i = 3; i < parts.length; i++) {
+            String[] rgb = parts[i].split(",");
+            Color color = Color.fromRGB(Integer.parseInt(rgb[0]), Integer.parseInt(rgb[1]), Integer.parseInt(rgb[2]));
+            if (i % 2 == 0) fades.add(color); else colors.add(color);
+        }
+
+        Firework firework = (Firework) player.getLocation().getWorld().spawnEntity(player.getLocation(), EntityType.FIREWORK_ROCKET);
+        FireworkMeta meta = firework.getFireworkMeta();
+        meta.setPower(power);
+        meta.addEffect(FireworkEffect.builder().with(type).withColor(colors).withFade(fades).trail(true).build());
+        firework.setFireworkMeta(meta);
+
+        for (int i = 1; i < amount; i++) {
+            Firework f = (Firework) player.getLocation().getWorld().spawnEntity(player.getLocation(), EntityType.FIREWORK_ROCKET);
+            f.setFireworkMeta(meta);
+        }
     }
 
-    @FunctionalInterface
-    private interface SoundPlayer {
-        void play(Location location, Sound sound, float volume, float pitch);
-    }
-
-    private void playSound(org.bukkit.entity.Player player, String data, SoundPlayer soundPlayer) {
+    private Sound parseSound(String data) {
         String[] parts = data.split(";");
+        String soundName = parts.length > 0 ? parts[0].trim() : "";
+        float volume = parts.length > 1 ? Float.parseFloat(parts[1]) : 1.0f;
+        float pitch = parts.length > 2 ? Float.parseFloat(parts[2]) : 1.0f;
+        String sourceName = parts.length > 3 ? parts[3].toUpperCase() : "MASTER";
+
+        Key key;
         try {
-            Sound sound = Sound.valueOf(parts[0].toUpperCase());
-            float volume = parts.length > 1 ? Float.parseFloat(parts[1]) : 1.0f;
-            float pitch = parts.length > 2 ? Float.parseFloat(parts[2]) : 1.0f;
-            soundPlayer.play(player.getLocation(), sound, volume, pitch);
-        } catch (Exception ignored) {}
+            org.bukkit.Sound bukkitSound = org.bukkit.Sound.valueOf(soundName.toUpperCase());
+            key = bukkitSound.key();
+        } catch (IllegalArgumentException e) {
+            String lowerCase = soundName.toLowerCase();
+            if (soundName.contains(":")) {
+                key = Key.key(lowerCase);
+            } else {
+                key = Key.key("minecraft", lowerCase);
+            }
+        }
+
+        Sound.Source source = Sound.Source.MASTER;
+        try {
+            source = Sound.Source.valueOf(sourceName);
+        } catch (IllegalArgumentException ignored) {}
+
+        return Sound.sound(key, source, volume, pitch);
+    }
+
+    private void playSoundCommand(Player player, String data) {
+        Sound sound = parseSound(data);
+        player.playSound(sound);
+
+    }
+
+    private void playBroadcastSoundCommand(String data) {
+        Sound sound = parseSound(data);
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            p.playSound(sound);
+        }
+
     }
 
     @FunctionalInterface

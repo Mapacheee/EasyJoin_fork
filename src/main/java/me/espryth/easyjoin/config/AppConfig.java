@@ -17,8 +17,7 @@ public record AppConfig(
             int priority,
             @Setting("isFirstJoinFormat") boolean isFirstJoinFormat,
             @Setting("join") ActionSection join,
-            @Setting("quit") ActionSection quit,
-            @Setting("auth") ActionSection auth
+            @Setting("quit") ActionSection quit
     ) {}
 
     @ConfigSerializable

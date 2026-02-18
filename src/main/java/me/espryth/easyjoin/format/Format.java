@@ -9,6 +9,5 @@ public record Format(
         int priority,
         boolean isFirstJoinFormat,
         List<Action> joinActions,
-        List<Action> quitActions,
-        List<Action> authActions
+        List<Action> quitActions
 ) {}

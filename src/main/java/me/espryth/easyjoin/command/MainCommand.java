@@ -1,25 +1,34 @@
 package me.espryth.easyjoin.command;
 
-import com.google.inject.Inject;
+import jakarta.inject.Inject;
 import com.thewinterframework.command.CommandComponent;
 import com.thewinterframework.service.ReloadServiceManager;
+import me.espryth.easyjoin.action.ActionQueue;
+import me.espryth.easyjoin.format.Format;
 import me.espryth.easyjoin.service.FormatService;
 import me.espryth.easyjoin.util.MessageUtils;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.Permission;
 import org.incendo.cloud.paper.util.sender.Source;
+import org.slf4j.Logger;
+
+import java.util.Optional;
 
 @CommandComponent
 public class MainCommand {
 
     private final ReloadServiceManager reloadServiceManager;
     private final FormatService formatService;
+    private final Logger logger;
 
     @Inject
-    public MainCommand(ReloadServiceManager reloadServiceManager, FormatService formatService) {
+    public MainCommand(ReloadServiceManager reloadServiceManager, FormatService formatService, Logger logger) {
         this.reloadServiceManager = reloadServiceManager;
         this.formatService = formatService;
+        this.logger = logger;
     }
 
     @Command("easyjoin")
@@ -28,6 +37,7 @@ public class MainCommand {
         sender.sendMessage(MessageUtils.colorize("&e&lEasy&6&lJoin &fV3"));
         if (sender.hasPermission("easyjoin.admin")) {
             sender.sendMessage(MessageUtils.colorize("&f- /ej reload"));
+            sender.sendMessage(MessageUtils.colorize("&f- /ej join <formatId> - simulate join for the given format (player only)"));
         }
     }
 
@@ -36,7 +46,27 @@ public class MainCommand {
     public void reload(Source source) {
         CommandSender sender = (CommandSender) source.source();
         reloadServiceManager.reload();
-        formatService.loadFormats();
+        formatService.loadFormats(logger);
         sender.sendMessage(MessageUtils.colorize("&aConfiguration reloaded!"));
+    }
+
+    @Command("easyjoin testjoin <formatId>")
+    @Permission("easyjoin.admin")
+    public void testJoin(Source source, @Argument("formatId") String formatId) {
+        CommandSender sender = (CommandSender) source.source();
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(MessageUtils.colorize("&cThis command can only be used by a player."));
+            return;
+        }
+
+        Player player = (Player) sender;
+        Optional<Format> formatOpt = formatService.getFormatById(formatId);
+        if (formatOpt.isEmpty()) {
+            sender.sendMessage(MessageUtils.colorize("&cNo format found with id: " + formatId));
+            return;
+        }
+
+        new ActionQueue(formatOpt.get().joinActions(), null).executeAll(player);
+        sender.sendMessage(MessageUtils.colorize("&aExecuted join actions for format: " + formatId));
     }
 }
