@@ -149,11 +149,24 @@ public class ActionService {
     private void sendAvatarMessage(Player player, String data, Consumer<Component> sender) {
         List<Component> avatar = AvatarUtils.getAvatar(player);
         String[] lines = data.split("<nl>");
+        final int AVATAR_OFFSET_PX = 76;
+
         for (int i = 0; i < 8; i++) {
             Component avatarLine = avatar.size() > i ? avatar.get(i) : Component.text("        ");
             String messageLine = lines.length > i ? lines[i] : "";
-            Component formattedMessageLine = MessageUtils
-                    .colorizeToComponent(PlaceholderAPI.setPlaceholders(player, messageLine));
+
+            final Component formattedMessageLine;
+
+            if (messageLine.startsWith("<c>")) {
+                String stripped = messageLine.substring(3);
+                String legacy = MessageUtils.formatString(player, stripped);
+                String centered = MessageUtils.getCenteredMessageWithOffset(legacy, AVATAR_OFFSET_PX);
+                formattedMessageLine = MessageUtils.colorizeToComponent(centered);
+            } else {
+                formattedMessageLine = MessageUtils
+                        .colorizeToComponent(PlaceholderAPI.setPlaceholders(player, messageLine));
+            }
+
             sender.accept(avatarLine.append(Component.text(" ")).append(formattedMessageLine));
         }
     }
@@ -207,10 +220,7 @@ public class ActionService {
         }
 
         Sound.Source source = Sound.Source.MASTER;
-        try {
-            source = Sound.Source.valueOf(sourceName);
-        } catch (IllegalArgumentException ignored) {
-        }
+        source = Sound.Source.valueOf(sourceName);
 
         return Sound.sound(key, source, volume, pitch);
     }

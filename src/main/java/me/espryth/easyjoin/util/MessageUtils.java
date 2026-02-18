@@ -53,10 +53,27 @@ public class MessageUtils {
     }
 
     public static String getCenteredMessage(String message) {
-        return getCenteredSpace(message) + message;
+        return getCenteredSpace(message, CENTER_PX) + message;
+    }
+
+    /**
+     * Centers a message accounting for content already occupying the left side
+     * (e.g. an avatar).
+     * 
+     * @param message  the text to center (with legacy § codes already applied)
+     * @param offsetPx pixels already consumed on the left (avatar width +
+     *                 separator)
+     */
+    public static String getCenteredMessageWithOffset(String message, int offsetPx) {
+        int effectiveCenter = CENTER_PX - (offsetPx / 2);
+        return getCenteredSpace(message, effectiveCenter) + message;
     }
 
     public static String getCenteredSpace(String message) {
+        return getCenteredSpace(message, CENTER_PX);
+    }
+
+    private static String getCenteredSpace(String message, int centerPx) {
         if (message == null || message.isEmpty())
             return "";
 
@@ -78,7 +95,7 @@ public class MessageUtils {
         }
 
         int halvedMessageSize = messagePxSize / 2;
-        int toCompensate = CENTER_PX - halvedMessageSize;
+        int toCompensate = centerPx - halvedMessageSize;
         int spaceLength = DefaultFontInfo.SPACE.getLength() + 1;
         int compensated = 0;
         StringBuilder sb = new StringBuilder();
