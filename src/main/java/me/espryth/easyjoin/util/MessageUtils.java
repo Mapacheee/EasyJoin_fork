@@ -21,22 +21,28 @@ public class MessageUtils {
     private final static int CENTER_PX = 154;
 
     public static String colorize(String text) {
-        if (text == null) return "";
+        if (text == null)
+            return "";
         String newText = HEX_COLOR_PATTERN.matcher(text).replaceAll(BUKKIT_HEX_COLOR);
+        if (newText.indexOf('§') >= 0) {
+            return newText;
+        }
         Component component = MINI_MESSAGE.deserialize(newText);
         if (component.equals(Component.text(newText))) {
-            // If MiniMessage didn't find any tags, fallback to legacy
             component = LegacyComponentSerializer.legacyAmpersand().deserialize(newText);
         }
         return LegacyComponentSerializer.legacySection().serialize(component);
     }
 
     public static Component colorizeToComponent(String text) {
-        if (text == null) return Component.empty();
+        if (text == null)
+            return Component.empty();
         String newText = HEX_COLOR_PATTERN.matcher(text).replaceAll(BUKKIT_HEX_COLOR);
+        if (newText.indexOf('§') >= 0) {
+            return LegacyComponentSerializer.legacySection().deserialize(newText);
+        }
         Component component = MINI_MESSAGE.deserialize(newText);
         if (component.equals(Component.text(newText))) {
-            // If MiniMessage didn't find any tags, fallback to legacy
             return LegacyComponentSerializer.legacyAmpersand().deserialize(newText);
         }
         return component;
@@ -51,7 +57,8 @@ public class MessageUtils {
     }
 
     public static String getCenteredSpace(String message) {
-        if (message == null || message.isEmpty()) return "";
+        if (message == null || message.isEmpty())
+            return "";
 
         int messagePxSize = 0;
         boolean previousCode = false;
