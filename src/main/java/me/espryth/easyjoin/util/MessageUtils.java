@@ -69,6 +69,22 @@ public class MessageUtils {
         return getCenteredSpace(message, effectiveCenter) + message;
     }
 
+    /**
+     * Returns a Component containing only the centering spaces needed to center
+     * {@code miniMessageText} with the given left offset, without converting the
+     * text itself to legacy format.
+     *
+     * @param legacyText the text already serialized to legacy § codes, used only
+     *                   for pixel-width measurement
+     * @param offsetPx   pixels already consumed on the left (avatar width +
+     *                   separator)
+     * @return a plain Component of spaces to prepend before the real Component
+     */
+    public static Component getCenteredSpaceComponent(String legacyText, int offsetPx) {
+        int effectiveCenter = CENTER_PX - (offsetPx / 2);
+        return Component.text(getCenteredSpace(legacyText, effectiveCenter));
+    }
+
     public static String getCenteredSpace(String message) {
         return getCenteredSpace(message, CENTER_PX);
     }

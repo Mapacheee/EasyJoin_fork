@@ -159,9 +159,11 @@ public class ActionService {
 
             if (messageLine.startsWith("<c>")) {
                 String stripped = messageLine.substring(3);
-                String legacy = MessageUtils.formatString(player, stripped);
-                String centered = MessageUtils.getCenteredMessageWithOffset(legacy, AVATAR_OFFSET_PX);
-                formattedMessageLine = MessageUtils.colorizeToComponent(centered);
+                String withPlaceholders = PlaceholderAPI.setPlaceholders(player, stripped);
+                String legacyForMeasure = MessageUtils.colorize(withPlaceholders);
+                Component padding = MessageUtils.getCenteredSpaceComponent(legacyForMeasure, AVATAR_OFFSET_PX);
+                Component content = MessageUtils.colorizeToComponent(withPlaceholders);
+                formattedMessageLine = padding.append(content);
             } else {
                 formattedMessageLine = MessageUtils
                         .colorizeToComponent(PlaceholderAPI.setPlaceholders(player, messageLine));
