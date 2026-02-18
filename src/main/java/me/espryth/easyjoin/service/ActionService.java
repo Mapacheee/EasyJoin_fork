@@ -106,9 +106,10 @@ public class ActionService {
         registerAction("[DELAY]", data -> (player, queue) -> {
             int delay = Integer.parseInt(data);
             queue.setPaused(true);
-            Bukkit.getScheduler().runTaskLater(queue.getPlugin(), () -> {
+            player.getScheduler().runDelayed(queue.getPlugin(), t -> {
                 queue.setPaused(false);
-                queue.executeAll(player);}, delay * 20L);
+                queue.executeAll(player);
+            }, null, delay * 20L);
         });
     }
 

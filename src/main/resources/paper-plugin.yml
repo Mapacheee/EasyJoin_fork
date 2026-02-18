@@ -3,6 +3,7 @@ name: EasyJoin
 version: ${project.version}
 main: me.espryth.easyjoin.EasyJoinPlugin
 authors: [Espryth, Mapacheee]
+folia-supported: true
 package-state: internal
 dependencies:
   server:

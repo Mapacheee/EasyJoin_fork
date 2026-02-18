@@ -20,7 +20,7 @@ public class ActionQueue {
 
     public void executeAll(Player player) {
         if (!Bukkit.isPrimaryThread()) {
-            Bukkit.getScheduler().runTask(plugin, () -> executeAll(player));
+            player.getScheduler().run(plugin, t -> executeAll(player), null);
             return;
         }
         while (cursor < actions.size()) {

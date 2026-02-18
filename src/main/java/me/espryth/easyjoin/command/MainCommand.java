@@ -14,6 +14,7 @@ import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.Permission;
 import org.incendo.cloud.paper.util.sender.Source;
 import org.slf4j.Logger;
+import org.bukkit.plugin.Plugin;
 
 import java.util.Optional;
 
@@ -23,12 +24,15 @@ public class MainCommand {
     private final ReloadServiceManager reloadServiceManager;
     private final FormatService formatService;
     private final Logger logger;
+    private final Plugin plugin;
 
     @Inject
-    public MainCommand(ReloadServiceManager reloadServiceManager, FormatService formatService, Logger logger) {
+    public MainCommand(ReloadServiceManager reloadServiceManager,
+            FormatService formatService, Logger logger, Plugin plugin) {
         this.reloadServiceManager = reloadServiceManager;
         this.formatService = formatService;
         this.logger = logger;
+        this.plugin = plugin;
     }
 
     @Command("easyjoin")
@@ -37,7 +41,8 @@ public class MainCommand {
         sender.sendMessage(MessageUtils.colorize("&e&lEasy&6&lJoin &fV3"));
         if (sender.hasPermission("easyjoin.admin")) {
             sender.sendMessage(MessageUtils.colorize("&f- /ej reload"));
-            sender.sendMessage(MessageUtils.colorize("&f- /ej join <formatId> - simulate join for the given format (player only)"));
+            sender.sendMessage(MessageUtils
+                    .colorize("&f- /ej join <formatId> - simulate join for the given format (player only)"));
         }
     }
 
@@ -66,7 +71,7 @@ public class MainCommand {
             return;
         }
 
-        new ActionQueue(formatOpt.get().joinActions(), null).executeAll(player);
+        new ActionQueue(formatOpt.get().joinActions(), plugin).executeAll(player);
         sender.sendMessage(MessageUtils.colorize("&aExecuted join actions for format: " + formatId));
     }
 }
