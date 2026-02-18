@@ -46,11 +46,9 @@ public class ActionService {
     }
 
     private void registerDefaultActions() {
-        registerAction("[MESSAGE]", data -> (player, queue) ->
-                sendMessage(player, data, player::sendMessage));
+        registerAction("[MESSAGE]", data -> (player, queue) -> sendMessage(player, data, player::sendMessage));
 
-        registerAction("[BROADCAST]", data -> (player, queue) ->
-                sendMessage(player, data, Bukkit::broadcast));
+        registerAction("[BROADCAST]", data -> (player, queue) -> sendMessage(player, data, Bukkit::broadcast));
 
         registerAction("[JSON_MESSAGE]", data -> (player, queue) -> {
             String json = MessageUtils.formatString(player, data);
@@ -72,25 +70,24 @@ public class ActionService {
             Bukkit.getOnlinePlayers().forEach(p -> p.sendActionBar(msg));
         });
 
-        registerAction("[TITLE]", data -> (player, queue) ->
-                showTitle(player, data, player::showTitle));
+        registerAction("[TITLE]", data -> (player, queue) -> showTitle(player, data, player::showTitle));
 
-        registerAction("[BROADCAST_TITLE]", data -> (player, queue) ->
-                showTitle(player, data, title -> Bukkit.getOnlinePlayers().forEach(p -> p.showTitle(title))));
+        registerAction("[BROADCAST_TITLE]", data -> (player, queue) -> showTitle(player, data,
+                title -> Bukkit.getOnlinePlayers().forEach(p -> p.showTitle(title))));
 
-        registerAction("[AVATAR_MESSAGE]", data -> (player, queue) ->
-                sendAvatarMessage(player, data, player::sendMessage));
+        registerAction("[AVATAR_MESSAGE]",
+                data -> (player, queue) -> sendAvatarMessage(player, data, player::sendMessage));
 
-        registerAction("[AVATAR_BROADCAST]", data -> (player, queue) ->
-                sendAvatarMessage(player, data, Bukkit::broadcast));
+        registerAction("[AVATAR_BROADCAST]",
+                data -> (player, queue) -> sendAvatarMessage(player, data, Bukkit::broadcast));
 
         registerAction("[CLEARCHAT]", data -> (player, queue) -> {
             int lines = Integer.parseInt(data);
-            for (int i = 0; i < lines; i++) player.sendMessage(Component.text(" "));
+            for (int i = 0; i < lines; i++)
+                player.sendMessage(Component.text(" "));
         });
 
-        registerAction("[FIREWORK]", data -> (player, queue) ->
-                spawnFirework(player, data));
+        registerAction("[FIREWORK]", data -> (player, queue) -> spawnFirework(player, data));
 
         registerAction("[CONSOLE]", data -> (player, queue) -> {
             String cmd = MessageUtils.formatString(player, data);
@@ -102,11 +99,9 @@ public class ActionService {
             player.performCommand(cmd);
         });
 
-        registerAction("[SOUND]", data -> (player, queue) ->
-                playSoundCommand(player, data));
+        registerAction("[SOUND]", data -> (player, queue) -> playSoundCommand(player, data));
 
-        registerAction("[BROADCAST_SOUND]", data -> (player, queue) ->
-                playBroadcastSoundCommand(data));
+        registerAction("[BROADCAST_SOUND]", data -> (player, queue) -> playBroadcastSoundCommand(data));
 
         registerAction("[DELAY]", data -> (player, queue) -> {
             try {
@@ -116,7 +111,8 @@ public class ActionService {
                     queue.setPaused(false);
                     queue.executeAll(player);
                 }, delay * 20L);
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException ignored) {
+            }
         });
     }
 
@@ -124,7 +120,8 @@ public class ActionService {
         Component msg = MessageUtils.colorizeToComponent(PlaceholderAPI.setPlaceholders(player, data));
         if (data.startsWith("<c>")) {
             String legacy = MessageUtils.formatString(player, data);
-            Component centeredMsg = MessageUtils.colorizeToComponent(MessageUtils.getCenteredMessage(legacy.replace("<c>", "")));
+            Component centeredMsg = MessageUtils
+                    .colorizeToComponent(MessageUtils.getCenteredMessage(legacy.replace("<c>", "")));
             sender.accept(centeredMsg);
         } else {
             sender.accept(msg);
@@ -148,9 +145,7 @@ public class ActionService {
                 Title.Times.times(
                         Duration.ofMillis(fadeIn * 50L),
                         Duration.ofMillis(stay * 50L),
-                        Duration.ofMillis(fadeOut * 50L)
-                )
-        );
+                        Duration.ofMillis(fadeOut * 50L)));
         titleSender.accept(titleObj);
     }
 
@@ -160,14 +155,16 @@ public class ActionService {
         for (int i = 0; i < 8; i++) {
             Component avatarLine = avatar.size() > i ? avatar.get(i) : Component.text("        ");
             String messageLine = lines.length > i ? lines[i] : "";
-            Component formattedMessageLine = MessageUtils.colorizeToComponent(PlaceholderAPI.setPlaceholders(player, messageLine));
+            Component formattedMessageLine = MessageUtils
+                    .colorizeToComponent(PlaceholderAPI.setPlaceholders(player, messageLine));
             sender.accept(avatarLine.append(Component.text(" ")).append(formattedMessageLine));
         }
     }
 
     private void spawnFirework(Player player, String data) {
         String[] parts = data.split(";");
-        if (parts.length < 3) return;
+        if (parts.length < 3)
+            return;
         FireworkEffect.Type type = FireworkEffect.Type.valueOf(parts[0].toUpperCase());
         int amount = Integer.parseInt(parts[1]);
         int power = Integer.parseInt(parts[2]);
@@ -177,17 +174,22 @@ public class ActionService {
         for (int i = 3; i < parts.length; i++) {
             String[] rgb = parts[i].split(",");
             Color color = Color.fromRGB(Integer.parseInt(rgb[0]), Integer.parseInt(rgb[1]), Integer.parseInt(rgb[2]));
-            if (i % 2 == 0) fades.add(color); else colors.add(color);
+            if (i % 2 == 0)
+                fades.add(color);
+            else
+                colors.add(color);
         }
 
-        Firework firework = (Firework) player.getLocation().getWorld().spawnEntity(player.getLocation(), EntityType.FIREWORK_ROCKET);
+        Firework firework = (Firework) player.getLocation().getWorld().spawnEntity(player.getLocation(),
+                EntityType.FIREWORK_ROCKET);
         FireworkMeta meta = firework.getFireworkMeta();
         meta.setPower(power);
         meta.addEffect(FireworkEffect.builder().with(type).withColor(colors).withFade(fades).trail(true).build());
         firework.setFireworkMeta(meta);
 
         for (int i = 1; i < amount; i++) {
-            Firework f = (Firework) player.getLocation().getWorld().spawnEntity(player.getLocation(), EntityType.FIREWORK_ROCKET);
+            Firework f = (Firework) player.getLocation().getWorld().spawnEntity(player.getLocation(),
+                    EntityType.FIREWORK_ROCKET);
             f.setFireworkMeta(meta);
         }
     }
@@ -199,23 +201,19 @@ public class ActionService {
         float pitch = parts.length > 2 ? Float.parseFloat(parts[2]) : 1.0f;
         String sourceName = parts.length > 3 ? parts[3].toUpperCase() : "MASTER";
 
-        Key key;
-        try {
-            org.bukkit.Sound bukkitSound = org.bukkit.Sound.valueOf(soundName.toUpperCase());
-            key = bukkitSound.key();
-        } catch (IllegalArgumentException e) {
-            String lowerCase = soundName.toLowerCase();
-            if (soundName.contains(":")) {
-                key = Key.key(lowerCase);
-            } else {
-                key = Key.key("minecraft", lowerCase);
-            }
+        final Key key;
+        final String lower = soundName.toLowerCase();
+        if (lower.contains(":")) {
+            key = Key.key(lower);
+        } else {
+            key = Key.key("minecraft", lower.replace('_', '.'));
         }
 
         Sound.Source source = Sound.Source.MASTER;
         try {
             source = Sound.Source.valueOf(sourceName);
-        } catch (IllegalArgumentException ignored) {}
+        } catch (IllegalArgumentException ignored) {
+        }
 
         return Sound.sound(key, source, volume, pitch);
     }
