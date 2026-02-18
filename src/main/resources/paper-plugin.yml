@@ -4,3 +4,8 @@ version: ${project.version}
 main: me.espryth.easyjoin.EasyJoinPlugin
 authors: [Espryth, Mapacheee]
 package-state: internal
+dependencies:
+  server:
+    PlaceholderAPI:
+      load: AFTER
+      required: false
