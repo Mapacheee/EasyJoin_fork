@@ -104,15 +104,11 @@ public class ActionService {
         registerAction("[BROADCAST_SOUND]", data -> (player, queue) -> playBroadcastSoundCommand(data));
 
         registerAction("[DELAY]", data -> (player, queue) -> {
-            try {
-                int delay = Integer.parseInt(data);
-                queue.setPaused(true);
-                Bukkit.getScheduler().runTaskLater(queue.getPlugin(), () -> {
-                    queue.setPaused(false);
-                    queue.executeAll(player);
-                }, delay * 20L);
-            } catch (NumberFormatException ignored) {
-            }
+            int delay = Integer.parseInt(data);
+            queue.setPaused(true);
+            Bukkit.getScheduler().runTaskLater(queue.getPlugin(), () -> {
+                queue.setPaused(false);
+                queue.executeAll(player);}, delay * 20L);
         });
     }
 
