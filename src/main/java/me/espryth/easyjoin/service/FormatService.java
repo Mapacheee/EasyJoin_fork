@@ -79,4 +79,8 @@ public class FormatService {
     public Optional<Format> getFormatById(String id) {
         return Optional.ofNullable(formats.get(id));
     }
+
+    public List<String> getFormatIds() {
+        return new ArrayList<>(formats.keySet());
+    }
 }

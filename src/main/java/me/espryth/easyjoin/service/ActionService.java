@@ -214,12 +214,15 @@ public class ActionService {
         String sourceName = parts.length > 3 ? parts[3].toUpperCase() : "MASTER";
 
         final Key key;
-        final String lower = soundName.toLowerCase();
-        if (lower.contains(":")) {
-            key = Key.key(lower);
-        } else {
-            key = Key.key("minecraft", lower.replace('_', '.'));
+        String namespace = "minecraft";
+        String path = soundName;
+        if (soundName.contains(":")) {
+            String[] split = soundName.split(":" , 2);
+            namespace = split[0].toLowerCase(Locale.ROOT);
+            path = split[1];
         }
+        path = path.toLowerCase(Locale.ROOT).replace('_', '.');
+        key = Key.key(namespace, path);
 
         Sound.Source source = Sound.Source.MASTER;
         source = Sound.Source.valueOf(sourceName);
@@ -246,3 +249,4 @@ public class ActionService {
         Action create(String data);
     }
 }
+
